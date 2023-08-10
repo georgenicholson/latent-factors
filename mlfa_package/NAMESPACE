@@ -1,0 +1,7 @@
+# Export all names
+exportPattern(".")
+exportPattern("^[[:alpha:]]+")
+
+importFrom(MASS, ginv)  # ginv is overlapping with other packages in the namespace
+importFrom("grDevices", "cairo_pdf")
+import(tidyverse)

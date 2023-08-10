@@ -1,0 +1,294 @@
+---
+title: "mlfa - R package for Multivariate Longitudinal Factor Analysis"
+author: 
+   - Fabian Falck and Matthias Kormaksson
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+bibliography: ref.bib
+link-citations: true
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>", 
+  dev = "cairo_pdf"
+)
+```
+
+## 1. Introduction {#introduction}
+
+This Vignette illustrates the usage *mlfa*, an R package for Multivariate Longitudinal Factor Analysis.
+
+## 2. Methodology {#methodlogy}
+
+see manuscript
+
+## 3. Examples
+
+### Example 1: Everything at a glance
+
+In this first example, we illustrate the usage of the key functions of mlfa at a glance. 
+We focus on demonstrating the main usage of these functions, and leave their detailed
+usage as well as more complex simulations for later examples. 
+
+Before we begin, we set up our environment ready for package usage. 
+
+```{r}
+# on BDI cluster
+.libPaths(new ="/apps/eb/software/R-bundle-Bioconductor/3.11-foss-2020a-R-4.0.0")
+# NOTE: change this to the path of the cloned mlfa_package repository
+devtools::load_all("/home/bdivdi.local/4tvcsw/multLinFacAnalys/mlfa")
+
+# set the seed to produce non-random results
+set.seed(1)
+
+# dependencies
+library(tidyr)
+library(ggplot2)
+library(mgcv)
+library(itsadug)
+library(readxl)
+# for plotting figures side-by-side
+require(gridExtra)
+
+# # NOTE: change this to your desired results directory directory
+results_dir = file.path("results", "2109_sim")  
+
+# TODO
+alpha <- 0.2
+```
+
+The task in this first example is to reproduce a set of 200 latent subject trajectories, stored in the vectors $\{z1, z2, z3\}$, which are generated from three assumed latent factors underlying the data and which we control and therefore know exactly. $\{z1, z2, z3\}$ are summarized in a $(2400 \times 3)$ matrix Z. At inference time, instead of having access to Z directly, we only have access to a matrix Y, which is generated from Z and another simulated matrix, the loadings matrix A, as follows: $Y = Z \dot A + \epsilon$, where $\epsilon$ is random noise. Conveniently, our model assumes the same nature of the data, so we are simulating an "ideal case" as input to our model, which is a good sanity check.
+
+We load this dataset and corresponding objects as follows: 
+
+```{r}
+source("/home/bdivdi.local/4tvcsw/multLinFacAnalys/mlfa_analysis/src/01_data_simulated.R")
+```
+
+The most important objects that this loads into memory are: ${d_sim, subject_data}$. $d_sim$ mainly summarises the columns of Z and Y. $subject_data$ contains the subject-specific (non-longitudinal) information. There are further data objects (an subset are $Z, z1, z2, z3, Y, A$), but we don't bother with them for now.
+
+Let's plot the simulated subject trajectories Z from all three factors: 
+
+```{r}
+p_z1_sim <- ggplot(mapping=aes(x=AVISITN, y=z1, group=USUBJID)) + 
+            geom_line(data=d_sim, aes(colour=TRT01P), alpha=alpha) + 
+            ggtitle("Simulated data - z1")
+p_z2_sim <- ggplot(mapping=aes(x=AVISITN, y=z2, group=USUBJID)) + 
+  geom_line(data=d_sim, aes(colour=TRT01P), alpha=alpha) + 
+  ggtitle("Simulated data - z2")
+p_z3_sim <- ggplot(mapping=aes(x=AVISITN, y=z3, group=USUBJID)) + 
+  geom_line(data=d_sim, aes(colour=TRT01P), alpha=alpha) + 
+  ggtitle("Simulated data - z3")
+
+grid.arrange(p_z1_sim, p_z2_sim, p_z3_sim, nrow=1, ncol=3)
+```
+
+Note TODO describe
+
+Now, let's plot their corresponding loadings matrix A. 
+
+```{r}
+A <- t(A)
+rownames(A) <- paste("y", seq(1:dim(A)[1]), sep = "")
+colnames(A) <- paste("a", seq(1:dim(A)[2]), sep = "")
+
+# A is (PxK) matrix
+X <- colnames(A)  # PCs
+Y <- rownames(A)  # variables
+# TODO double check whether this is correct
+Z <- as.vector(t(A))  # flatten matrix in the direction of column dimension
+data <- expand.grid(X=X, Y=Y)
+data$Z <- Z
+
+p_A_sim <- ggplot(data, aes(X, Y, fill= Z)) +
+  geom_tile() +
+  # for further tweaking of aesthetics of heatmap: https://stackoverflow.com/questions/50800179/display-issue-with-heatmap-in-ggplot
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.y = element_text(size = 6)) +
+  scale_fill_distiller(palette = "RdBu")  # also good: BrBG, PiYG; Sequential Palett (see https://ggplot2.tidyverse.org/reference/scale_brewer.html#palettes)
+p_A_sim <- p_A_sim + ggtitle("Simulated data - A") + xlab("Principal Components") + ylab("Measurements") + labs(fill="Loadings value")
+p_A_sim
+```
+
+To summarise again: Our goal is to reconstruct $Z$ and $A$ from $Y$ using the mlfa package. And next, we show you how. 
+
+We start by using the `mfd` function (stage 1 and 2 of our model) which we feed Y as an input as follows: 
+
+```{r}
+# stage 1 and 2
+mfd_object <- mfd(data = d_sim, vars = paste("y", seq(1:30), sep = ""), time = "AVISITN", subject = "USUBJID", loadings.n_PCs = 3) 
+```
+
+We explain the parameters of `mfd` in the following:
+* `data` is a tibble containing the input data that you aim to regress on.
+* in `vars`, you select which variables it is you want to regress on. In this case, we select all 30 columns from the original data matrix Y.
+* `subject` specifies the column in `data` that indicates which rows in `data` correspond to one sequence. A possible value in `subject` could be the subject ID of a certain patient.
+* `time` specifies the column in `data` that specifies longitudinality, i.e. for example corresponds to the timestep or the visit of a subject's sequence.
+* `loadings.n_PCs` specifies the number of Principal Components, i.e. the K dimension of A. Here, we know that the simulated A matrix has 3 rows, thus, we set this to 3.
+
+`mfd_object` contains several outputs as attributes. Most importantly, these are `mfd_object$A`, which is the estimated loadings matrix, and `mfd_object$data_out`, which is a tibble containing the estimated scores. 
+
+As a first check, we compare the simulated loadings matrix `A` with the estimated loadings matrix `mfd_object$A`. 
+
+``` {r}
+# compare loadings matrices
+
+# 1) A estimated from model
+
+# A is (PxK) matrix
+X <- colnames(mfd_object$A)  # PCs
+Y <- rownames(mfd_object$A)  # variables
+# TODO double check whether this is correct
+Z <- as.vector(t(mfd_object$A))  # flatten matrix in the direction of column dimension
+data <- expand.grid(X=X, Y=Y)
+data$Z <- Z
+
+p_A_est <- ggplot(data, aes(X, Y, fill= Z)) +
+  geom_tile() +
+  # for further tweaking of aesthetics of heatmap: https://stackoverflow.com/questions/50800179/display-issue-with-heatmap-in-ggplot
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.y = element_text(size = 6)) +
+  scale_fill_distiller(palette = "RdBu")  # also good: BrBG, PiYG; Sequential Palett (see https://ggplot2.tidyverse.org/reference/scale_brewer.html#palettes)
+p_A_est <- p_A_est + ggtitle("Estimated loadings - A") + xlab("Principal Components") + ylab("Measurements") + labs(fill="Loadings value")
+p_A_est
+
+# 2) A simulated 
+
+A <- t(A)
+rownames(A) <- paste("y", seq(1:dim(A)[1]), sep = "")
+colnames(A) <- paste("a", seq(1:dim(A)[2]), sep = "")
+A
+
+# A is (PxK) matrix
+X <- colnames(A)  # PCs
+Y <- rownames(A)  # variables
+# TODO double check whether this is correct
+Z <- as.vector(t(A))  # flatten matrix in the direction of column dimension
+data <- expand.grid(X=X, Y=Y)
+data$Z <- Z
+
+p_A_sim <- ggplot(data, aes(X, Y, fill= Z)) +
+  geom_tile() +
+  # for further tweaking of aesthetics of heatmap: https://stackoverflow.com/questions/50800179/display-issue-with-heatmap-in-ggplot
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text.y = element_text(size = 6)) +
+  scale_fill_distiller(palette = "RdBu")  # also good: BrBG, PiYG; Sequential Palett (see https://ggplot2.tidyverse.org/reference/scale_brewer.html#palettes)
+p_A_sim <- p_A_sim + ggtitle("Simulated data - A") + xlab("Principal Components") + ylab("Measurements") + labs(fill="Loadings value")
+p_A_sim
+
+grid.arrange(p_A_sim, p_A_est, nrow=1, ncol=2)
+```
+
+TODO describe
+
+In a moment, we will also compare simulated and estimated scores. However, before we do this, we aim at finding the latent factors - the introduced longitudinal "trends" underlying the data that differ by the variable `TRT01P` in `subject_data`. We do this by fitting splines to the averaged data using the second main function of the package, namely `mlfa`. 
+
+Before we do so, we do one minor tweak to our estimated Z and A matrix: Both matrices are corresponding and defined *up to a rotation*. To be able to reproduce "more illustrative" results, we rotate the estimated `A` and `Z` matrix and likewise adjust the `mfd_object`.
+
+``` {r}
+# perform rotation on A and Z, as found rotation of A is arbitrary
+rot <- matrix(data=c(-1, 0, 0, 
+                     0, 1, 0, 
+                     0, 0, 1), 3, 3)
+# store colnames (as they get lost in the matrix multiplication)
+colnames_A <- colnames(mfd_object$A)
+colnames_Z <- colnames(mfd_object$Z)
+# do rotation
+mfd_object$A <- mfd_object$A %*% rot
+mfd_object$Z <- mfd_object$Z %*% rot
+# reassign colnames
+colnames(mfd_object$A) <- colnames_A
+colnames(mfd_object$Z) <- paste0(colnames_Z)
+# remove old z columns and assign rotated z columns to output of mfd object
+mfd_object$data_out <- mfd_object$data_out %>% select(-z1, -z2, -z3)
+mfd_object$data_out <- mfd_object$data_out %>% dplyr::bind_cols(as_tibble(mfd_object$Z))
+```
+
+Now, we are ready to fit the latent factors: 
+
+``` {r}
+mlfa_object <- mlfa(mfd = mfd_object, type = 1, df = 3, subject_data = subject_data, type1.strata = 'TRT01P', type1.group = 'USUBJID')
+```
+
+Again, we explain the parameters of `mlfa`: 
+* `mfd` is the mfd object we fitted in the previous step. 
+* `type` refers to the model type we want to fit. There are 2 types implemented (further details can be found in the reference manual).
+* `df` refers to the degrees of freedom of the fitted splines.
+* `subject` data, as explained above, is the subject specific data. 
+* `type1.strata` and `type1.group` are model specific parameters (further details can be found in the reference manual).
+
+Now, we are ready to compare both simulated and estimated scores and the estimated longitudinal factors side-by-side: 
+
+We can plot the longitudinal factors very easily as follows (for now, we just store the plots in a list and plot them in a large grid in the very end): 
+
+``` {r}
+lf_plot_list <- plot.mlfa(mlfa_object, save_dir = results_dir)
+```
+
+We now plot the (rotated) estimated scores: 
+
+``` {r}
+p_z1_est_r <- ggplot(mapping=aes(x=AVISITN, y=z1, group=USUBJID)) + 
+  geom_line(data=mfd_object$data_out, aes(colour=TRT01P), alpha=alpha) + 
+  ggtitle("Estimated scores (rotated) - z1")
+p_z2_est_r <- ggplot(mapping=aes(x=AVISITN, y=z2, group=USUBJID)) + 
+  geom_line(data=mfd_object$data_out, aes(colour=TRT01P), alpha=alpha) + 
+  ggtitle("Estimated scores (rotated) - z2")
+p_z3_est_r <- ggplot(mapping=aes(x=AVISITN, y=z3, group=USUBJID)) + 
+  geom_line(data=mfd_object$data_out, aes(colour=TRT01P), alpha=alpha) + 
+  ggtitle("Estimated scores (rotated) - z3")
+```
+
+Finally, we compare simulated and estimated scores and estimated latent factors in one plot: 
+
+``` {r}
+grid.arrange(p_z1_sim, p_z1_est_r+ylim(-4, 4), lf_plot_list[[1]]+ylim(-4, 4), 
+             p_z2_sim, p_z2_est_r+ylim(-4, 4), lf_plot_list[[2]]+ylim(-4, 4), 
+             p_z3_sim, p_z3_est_r+ylim(-4, 4), lf_plot_list[[3]]+ylim(-4, 4), nrow=3, ncol=3)
+```
+
+
+
+TODO show plot.mfd
+
+
+## A. Appendix {#appendix}
+
+### Data simulation (details)
+
+
+
+
+
+
+
+# for learning the Syntax
+
+
+```{r setup}
+library(mlfa)
+```
+
+```{r}
+# Add two numbers together
+add <- function(a, b) a + b
+add(10, 20)
+```
+
+
+---------------------------------------
+---------------------------------------
+# TODO 
+- references in ref.bib
+- formulas from manuscript 

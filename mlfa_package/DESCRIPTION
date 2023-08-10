@@ -1,0 +1,36 @@
+Package: mlfa
+Title: Multivariate Longitudinal Factor Analysis
+Description: This R package implements a three-stage multivariate longitudinal factor analysis (mlfa) model, as well as helper functions for data perprocessing and plotting functionality. The model, which is detailed in the accompanying manuscript, allows to characterise latent longitudinal trajectories and relate them linearly with the measurements underlying the data. On a high-level, the model consists of a sparsified Probabilistic Principal Component Analysis based dimensionality reduction (stages one and two) followed by a "longitudinal smoothing" with Generalized Additive Mixed models (stage three).
+Maintainer: Fabian Falck <fabian.falck@stats.ox.ac.uk>
+Authors: Fabian Falck (University of Oxford) [cre, aut], Matthias Kormaksson (Novartis) [aut], George Nicholson (University of Oxford) [aut]
+URL: https://github.com/FabianFalck/mlfa
+BugReports: https://github.com/FabianFalck/mlfa/issues
+Version: 0.1
+Depends: R (>= 3.0.0)
+Imports: 
+    tidyverse, 
+    pcaMethods,
+    MASS,  
+    itertools,
+    rapportools, 
+    gsubfn (>= 0.7-0),  
+    itsadug, 
+    dplyr, 
+    ggplot2, 
+    methods, 
+    mgcv, 
+    nlme, 
+    tibble, 
+    cowplot, 
+    RColorBrewer
+Suggests: 
+    testthat,
+    covr,
+    knitr,
+    rmarkdown
+License: MIT + file LICENSE
+Type: Package
+Encoding: UTF-8
+LazyData: true
+VignetteBuilder: knitr
+RoxygenNote: 7.1.0

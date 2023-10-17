@@ -12,7 +12,6 @@ par_sets_include_in_tab <- c("Default parameters", "Increased magnitude of (nega
   "Increased $\\sigmaARNok$", "Increased $\\sigmaRINok$", "Increased $\\sigmaY$")[-3]
 
 
-
 ######################################################
 # Create parameter table
 tab_out <- data.frame()

@@ -6,7 +6,7 @@ for (file_curr in fn_files_to_source) {
   source(file_curr)
 }
 
-control <- get_control_parameters(parameter_set = 1)
+control <- get_control_parameters_simulations(parameter_set = 1)
 
 
 time_of_final_week_effect <- control$time_pt_eval

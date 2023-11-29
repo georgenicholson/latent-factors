@@ -5,7 +5,7 @@ for (file_curr in fn_files_to_source) {
   source(file_curr)
 }
 
-control <- get_control_parameters(parameter_set = 1)
+control <- get_control_parameters_simulations(parameter_set = 1)
 
 par_sets_include_in_tab <- c("Default parameters", "Increased magnitude of (negative) effect size $\\mu_{\\text{active,16}}$", 
   "Decreased effect size", "Increased $\\rhoARNok$", "Decreased $\\rhoARNok$", 

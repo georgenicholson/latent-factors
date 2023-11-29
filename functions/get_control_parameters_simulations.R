@@ -1,6 +1,6 @@
 #########################################################################
 # Function to get plotting parameters
-get_control_parameters <- function(parameter_set = 1) {
+get_control_parameters_simulations <- function(parameter_set = 1) {
   control <- list(
 
     # Default parameters for simulation (to be varied)

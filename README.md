@@ -28,4 +28,8 @@ to install the required packages for the scripts.
 
 To subdirectory `scripts` contains all the code needed to reproduce the results, and this can be done by sourcing the wrapper function as follows:
 
+```
 source("scripts/00_wrapper.R")
+```
+
+The above script will first call `scripts/s01_emax_curves_demo_plot.R`, creating a plot of example Emax curves in `plots/example_emax_curves.R`

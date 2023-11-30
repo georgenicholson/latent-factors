@@ -32,4 +32,9 @@ To subdirectory `scripts` contains all the code needed to reproduce the results,
 source("scripts/00_wrapper.R")
 ```
 
-The above script will first call `scripts/s01_emax_curves_demo_plot.R`, creating a plot of example Emax curves in `plots/example_emax_curves.R`
+The above script will first source `scripts/s01_emax_curves_demo_plot.R`, creating a plot of example Emax curves in `plots/example_emax_curves.pdf`.
+
+Next the script will source  `scripts/s02_simulation_study.R`, which will run the simulation study.
+
+Finally the script sources  `scripts/s03_output_latex_tables.R`, which collects results and outputs tables in Latex format in `tables/default_sim_parameter_table.txt`.
+

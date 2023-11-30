@@ -1332,30 +1332,6 @@
       ],
       "Hash": "fec5f52652d60615fdb3957b3d74324a"
     },
-    "mlfa": {
-      "Package": "mlfa",
-      "Version": "0.1",
-      "Source": "unknown",
-      "Requirements": [
-        "MASS",
-        "R",
-        "RColorBrewer",
-        "cowplot",
-        "dplyr",
-        "ggplot2",
-        "gsubfn",
-        "itertools",
-        "itsadug",
-        "methods",
-        "mgcv",
-        "nlme",
-        "pcaMethods",
-        "rapportools",
-        "tibble",
-        "tidyverse"
-      ],
-      "Hash": "d4930390e94d52cfb0e629f778161a57"
-    },
     "modelr": {
       "Package": "modelr",
       "Version": "0.1.11",

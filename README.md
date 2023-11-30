@@ -18,6 +18,8 @@ changing `path_to_dir` to the path of your local version of this repository,
 path_to_dir <- "path/to/latent-factors"
 setwd(path_to_dir)
 renv::activate(path_to_dir)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
 renv::restore(path_to_dir)
 ```
 to install the required packages for the scripts. 

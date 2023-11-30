@@ -1,4 +1,4 @@
-# A framework for longitudinal latent factor modelling of treatment response in clinical trials
+# A framework for longitudinal latent factor modelling of treatment response in clinical trials with applications to Psoriatic Arthritis and Rheumatoid Arthritis
 
 This repository contains the R scripts needed to reproduce the simulated results reported 
 in the manuscript 'A framework for longitudinal latent factor modelling of treatment response in clinical trials with applications to Psoriatic Arthritis and Rheumatoid Arthritis'. 
@@ -12,8 +12,8 @@ or above on Windows, you will also need to install
 first [clone](https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository)
 this repository onto your local machine. Next, open an R console, and install the 
 [renv](https://rstudio.github.io/renv/index.html) R package if you don't have it 
-already (e.g. via `install.packages("renv")`). Then, run the following, 
-changing `path_to_dir` to the path of your local version of this repository,
+already (e.g. via `install.packages("renv")`). Then, run the following code block to install the required packages for the scripts,  
+changing `path_to_dir` to the path of your local version of this repository:
 ```
 path_to_dir <- "path/to/latent-factors"
 setwd(path_to_dir)
@@ -22,10 +22,11 @@ if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 renv::restore(path_to_dir)
 ```
-to install the required packages for the scripts. 
+
 
 ## Scripts to reproduce simulation results in manuscript
 
-To subdirectory `scripts` contains all the code needed to reproduce the results, and this can be done by sourcing the wrapper function as follows:
+The subdirectory `scripts` contains all the code needed to reproduce the results. 
+This can be conveniently done by sourcing the wrapper function as follows:
 
 source("scripts/00_wrapper.R")

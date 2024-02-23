@@ -17,6 +17,7 @@ get_control_parameters_simulations <- function(parameter_set = 1) {
     # Default parameters for simulation (fixed)
     endpoint_proportions = c(5, 5, 2) / 12,
     n_its = 1000, # 1000 its takes 56 mins
+    n_its_benchmark = 1000, # Fewer data sets analysed in benchmarking as external methods (RNN, VAR etc.) are more computationally intensive
     n_var = 12,
     n_fac = 3,
     time_of_half_max_effect = 2,
@@ -41,6 +42,30 @@ get_control_parameters_simulations <- function(parameter_set = 1) {
                                         "Increased $\\sigmaRINok$" = list(theta_RI_sd = 1, theta_resid_sd = .5, y_resid_sd = .5),
                                         "Increased $\\sigmaY$" = list(y_resid_sd = 1, theta_resid_sd = .5, theta_RI_sd = .5))
   
+  
+  control$ts_methods <- c("car1", "arma_1_0", "arma_0_1", "arma_1_1", "arma_2_0", "arma_0_2", "arma_2_1", "arma_1_2", "exp_smooth")
+  control$model_names <- c("fac_0_longit_0", 
+                           "fac_1_longit_0", 
+                           paste0("fac_0_longit_1_", control$ts_methods), 
+                           "fac_1_longit_1",
+                           "VAR")
+                           # "LSTM",
+                           # "GRU",
+                           # "RNN")
+  control$input <- c(1, 2, rep(3, length(control$ts_methods)), 4, 4)
+  control$methods <- c("\\lm{1}", 
+                       "\\lm{2}",
+                       "CAR(1) (\\lm{3})", 
+                       "ARMA(1,0)", 
+                       "ARMA(0,1)", 
+                       "ARMA(1,1)", 
+                       "ARMA(2,0)", 
+                       "ARMA(0,2)", 
+                       "ARMA(2,1)", 
+                       "ARMA(1,2)",
+                       "ES",
+                       "\\lm{4}",
+                       "VAR")
   control$parameter_change_list
   change_curr <- control$parameter_change_list[[parameter_set]]
   for (nam in names(change_curr)) {

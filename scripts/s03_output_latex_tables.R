@@ -109,6 +109,7 @@ for (j in 1:control$n_parameter_sets) {
                           fac = c(F, T, F, T),
                           longit = c(F, F, T, T),
                           model = c("M1", "M2", "M3", "M4"),
+                          input = 1:4,
                           mae = format_fun(mae, ndp_precise),
                           mse = format_fun(mse, ndp_precise),
                           mse_se = format_fun(mse_se, ndp),
@@ -152,13 +153,17 @@ mse_nam <- paste0('MSE', se_fun_title("\\text{SE}"))
 mn_ci_width_nam <- paste0('CI width', se_fun_title("\\text{SE}"))
 coverage_nam <- paste0('Coverage', se_fun_title("\\text{SE}"))
 bias_nam <- paste0('Bias', se_fun_title("\\text{SE}"))
-nam_out <- c('Model', 'Factor', 'Longit', bias_nam, coverage_nam, mse_nam, mn_ci_width_nam, pow_nam)
+# nam_out <- c('Model', 'Factor', 'Longit', bias_nam, coverage_nam, mse_nam, mn_ci_width_nam, pow_nam)
+nam_out <- c('Method', 'MV', 'Longit', 'Input', mse_nam, bias_nam, type1_nam, coverage_nam, pow_nam)
+
 x <- par_sets_include_in_tab[2]
 
 res_list_out <- lapply(res_list[par_sets_include_in_tab], function(x) {
                               x$Model <- paste0("M", 1:4);
+                              x$Method <- paste0("\\lm{", 1:4, "}");
+                              x$Input <- paste0("\\dataset{", 1:4, "}");
                               x$Longit <- c("", "", "\\checkmark", "\\checkmark");
-                              x$Factor <- c("", "\\checkmark", "", "\\checkmark");
+                              x$MV <- c("", "\\checkmark", "", "\\checkmark");
                               x[bias_nam] <- paste0(ifelse(x$bias_problem, latex_for_problem, ""), 
                                                       "{", x$bias, se_fun(x$bias_se), "}");
                               x[mse_nam] <- paste0(x$mse, se_fun(x$mse_se));

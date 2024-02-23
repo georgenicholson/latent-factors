@@ -73,6 +73,12 @@ get_control_parameters_simulations <- function(parameter_set = 1) {
   }
   control$parameter_set <- parameter_set
   control$n_parameter_sets <- length(control$parameter_change_list)
+  
+  control$sim_results_file <- file.path("tables", "/sim_results.txt")
+  control$default_sim_table_file <- file.path("tables", "/default_sim_parameter_table.txt")
+  control$emax_example_plot_file <- file.path("plots", "example_emax_curves.pdf")
+  control$benchmarking_results_file <- file.path("tables", "/benchmarking_results.txt")
+  control$numbers_out_dir <- "text_numbers/"
   return(control)
 }
 

@@ -1,3 +1,5 @@
+.libPaths("/gpfs3/well/lindgren-ukbb/users/qgj547/R/4.2/skylake")
+
 #######################################
 # Load local R package
 devtools::load_all("mlfa_package")

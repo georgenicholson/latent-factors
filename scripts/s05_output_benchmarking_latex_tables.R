@@ -121,7 +121,7 @@ coverage_nam <- paste0('Coverage', se_fun_title("\\text{SE}"))
 bias_nam <- paste0('Bias', se_fun_title("\\text{SE}"))
 type1_nam <- paste0('Type I error', se_fun_title("\\text{SE}"))
 # nam_out <- c('Model', bias_nam, coverage_nam, mse_nam, mn_ci_width_nam, pow_nam)
-nam_out <- c('Method', 'MV', 'Longit', 'Input', mse_nam, bias_nam, sd_nam)#, type1_nam, pow_nam)
+nam_out <- c('Method', 'Input', 'MV', 'Longit', mse_nam, bias_nam, sd_nam)#, type1_nam, pow_nam)
 x <- par_sets_include_in_tab[2]
 
 res_list_out <- lapply(res_list[sims_include], function(x) {
@@ -178,18 +178,9 @@ if (length(res_list_out) == 1) {
 
 
 dir.create("tables", showWarnings = FALSE)
-sim_results_file <- file.path("tables", "/benchmarking_results.txt")
-cat(sim_results_latex, file = sim_results_file)
+cat(sim_results_latex, file = control$benchmarking_results_file)
 
-tab_export_files <- c(sim_results_file)
-tab_export_files_zipped <- zip::zip(zipfile = file.path("zipped_tables.zip"),
-                                    files = tab_export_files,
-                                    mode = "cherry-pick")
-tab_export_files_zipped <- file.path("zipped_tables.tar.gz")
-tar(tarfile = tab_export_files_zipped,
-    files = tab_export_files,
-    compression = 'gzip',
-    tar = "tar")
+
 
 # Paste below in terminal to copy to Overleaf
 # tar xvzf '/mnt/c/Users/nicho/Dropbox/GitHub_Dropbox/latent-factors/zipped_tables.tar.gz' -C '/mnt/c/Users/nicho/Dropbox/Apps/Overleaf/LatentFactors_OxfordNovartis (J Biomedical Informatics)/Figures/BDI_plot_export' 

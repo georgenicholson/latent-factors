@@ -24,9 +24,8 @@ y2 <- emax_curve(t_eval = xseq,
                     size_of_final_week_effect = -(size_of_final_week_effect_placebo + size_of_final_week_effect_active_effect))
 dir.create("plots", showWarnings = FALSE)
 
-emax_example_plot_file <- file.path("plots", "example_emax_curves.pdf")
 cexax <- .65
-pdf(file = emax_example_plot_file, 6, 4)
+pdf(file = control$emax_example_plot_file, 6, 4)
 par(oma = c(1, 1, 1, 7))
 matplot(xseq, cbind(y1, y2), ty = "l",
         xlab = "Week",

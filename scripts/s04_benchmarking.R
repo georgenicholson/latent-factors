@@ -8,7 +8,7 @@ fn_files_to_source <- list.files("functions/", full.names = TRUE)
 for (file_curr in fn_files_to_source) {
   source(file_curr)
 }
-
+ 
 run_on_a_server <- FALSE
 if (run_on_a_server) {
   source("functions/process_command_line_args.R")

@@ -40,6 +40,7 @@ for (sim_type in c("non_null", "null")) {
     resl[[sim_type]][[model_name]] <- list()
       resl[[sim_type]][[model_name]] <- list()
       resl[[sim_type]][[model_name]]$y <- restab
+      resl[[sim_type]][[model_name]]$run_time <- c()
       for (fac_curr in 1:n_fac) {
         resl[[sim_type]][[model_name]][[paste0("z", fac_curr)]] <- restab
       }
@@ -112,9 +113,12 @@ for (it in 1:control$n_its_benchmark) {
       
       ##########################################################
       # Single time point analysis of single measurement
+      start_time <- Sys.time()
       active_y_single_t <- results_df[results_df$arm == "Active" & results_df$Time == control$time_pt_eval, "y"]
       placebo_y_single_t <- results_df[results_df$arm == "Placebo" & results_df$Time == control$time_pt_eval, "y"]
       t_test_curr <- t.test(x = active_y_single_t, y = placebo_y_single_t, var.equal = TRUE)
+      end_time <- Sys.time()
+      resl[[sim_type]]$fac_0_longit_0$run_time[it] <- end_time - start_time
       resl[[sim_type]]$fac_0_longit_0$y$est[it] <- t_test_curr$estimate[1] - t_test_curr$estimate[2]
       resl[[sim_type]]$fac_0_longit_0$y$low[it] <- t_test_curr$conf.int[1]
       resl[[sim_type]]$fac_0_longit_0$y$upp[it] <- t_test_curr$conf.int[2]
@@ -136,17 +140,19 @@ for (it in 1:control$n_its_benchmark) {
         
         # CAR1 method
         if (ts_method == "car1") {
+          start_time <- Sys.time()
           lme_fac_0_longit_1 <- nlme::lme(fixed = fixed_form_y,
                                           random = ~ 1 | id_fac,
                                           data = results_df,
                                           correlation = nlme::corCAR1(form = ~ Time),
                                           control = nlme::lmeControl(returnObject = TRUE),
                                           method = "ML")
-      
+          end_time <- Sys.time()
         }
         
         # ARMA methods
         if (grepl("arma", ts_method)) {
+          start_time <- Sys.time()
           p_curr <- as.numeric(strsplit(ts_method, split = "_")[[1]][2])
           q_curr <- as.numeric(strsplit(ts_method, split = "_")[[1]][3])
           lme_fac_0_longit_1 <- nlme::lme(fixed = fixed_form_y,
@@ -155,9 +161,11 @@ for (it in 1:control$n_its_benchmark) {
                                           correlation = nlme::corARMA(form = ~ Time, p = p_curr, q = q_curr),
                                           control = nlme::lmeControl(returnObject = TRUE),
                                           method = "ML")
+          end_time <- Sys.time()
         }
         current_mod_summ <- summary(lme_fac_0_longit_1)
         df_curr <- current_mod_summ$tTable[coef_name, "DF"]
+        resl[[sim_type]][[nam_curr]]$run_time[it] <- end_time - start_time
         resl[[sim_type]][[nam_curr]]$y$est[it] <- current_mod_summ$tTable[coef_name, "Value"]
         resl[[sim_type]][[nam_curr]]$y$se[it] <- current_mod_summ$tTable[coef_name, "Std.Error"]
         resl[[sim_type]][[nam_curr]]$y$pval[it] <- current_mod_summ$tTable[coef_name, "p-value"]
@@ -168,6 +176,7 @@ for (it in 1:control$n_its_benchmark) {
   
         # Exponential smoothing
         if (ts_method == "exp_smooth" & sim_type == "non_null") {
+          start_time <- Sys.time()
           results_df$y_diff <- NA
           for (id in id_unique) {
             for (j in 2:n_t) {
@@ -178,7 +187,6 @@ for (it in 1:control$n_its_benchmark) {
           }
           results_df_diff <- results_df[!is.na(results_df$y_diff), ]
           contrasts_vs_placebo_form_y_diff <- as.formula(paste0("y_diff ~ -1 + time_fac + time_fac:arm"))
-  
           lme_fac_0_longit_1 <- nlme::lme(fixed = contrasts_vs_placebo_form_y_diff,
                                           random = ~ 1 | id_fac,
                                           data = results_df_diff,
@@ -191,6 +199,8 @@ for (it in 1:control$n_its_benchmark) {
           
           fixed_effect_coefs <- nlme::fixef(lme_fac_0_longit_1)
           contrast_vector <- as.numeric(grepl("ctive", names(fixed_effect_coefs)))
+          end_time <- Sys.time()
+          resl[[sim_type]][[nam_curr]]$run_time[it] <- end_time - start_time
           resl[[sim_type]][[nam_curr]]$y$est[it] <- c(fixed_effect_coefs %*% contrast_vector)
           resl[[sim_type]][[nam_curr]]$y$se[it] <- sqrt(c(t(contrast_vector) %*% vcov(lme_fac_0_longit_1) %*% contrast_vector))
           resl[[sim_type]][[nam_curr]]$y$pval[it] <- 2 * pt(abs(resl[[sim_type]][[nam_curr]]$y$est[it] / resl[[sim_type]][[nam_curr]]$y$se[it]),
@@ -207,6 +217,7 @@ for (it in 1:control$n_its_benchmark) {
       ##########################################################
       # Single time point analysis of factors
       z_est_vec_at_estim_t<-z_se_vec_at_estim_t <- c()
+      start_time <- Sys.time()
       for (fac_curr in 1:n_fac) {
         z_nam <- paste0("z", fac_curr)
         active_z_single_t <- results_df[results_df$arm == "Active" & results_df$Time == control$time_pt_eval, z_nam]
@@ -221,7 +232,8 @@ for (it in 1:control$n_its_benchmark) {
         z_est_vec_at_estim_t[fac_curr] <- resl[[sim_type]]$fac_1_longit_0[[z_nam]]$est[it]
         z_se_vec_at_estim_t[fac_curr] <- resl[[sim_type]]$fac_1_longit_0[[z_nam]]$se[it]
       }
-      
+      end_time <- Sys.time()
+      resl[[sim_type]]$fac_1_longit_0$run_time[it] <- end_time - start_time
       resl[[sim_type]]$fac_1_longit_0$y$est[it] <- t(mfd_object$A[y_nam, ]) %*% z_est_vec_at_estim_t * mfd_object$sd_scale_factor[y_nam]
       resl[[sim_type]]$fac_1_longit_0$y$se[it] <- sqrt(t(mfd_object$A[paste0("Y", control$y_ind_use), ]) %*% 
                                              diag((z_se_vec_at_estim_t)^2) %*% 
@@ -235,6 +247,7 @@ for (it in 1:control$n_its_benchmark) {
     
       ##########################################################
       # Multiple time point factor analysis
+      start_time <- Sys.time()
       z_treatment_means_form <- as.formula(paste0("z ~ 1 + arm:(", baseline_form_curr, ")"))
       z_contrasts_vs_placebo_form <- as.formula(paste0("z ~ -1 + time_fac + active_binary:(", baseline_form_curr, ")"))
       fixed_form_z <- switch(estimate_type,
@@ -270,6 +283,8 @@ for (it in 1:control$n_its_benchmark) {
         z_est_vec_at_estim_t[fac_curr] <- resl[[sim_type]]$fac_1_longit_1[[z_nam]]$est[it]
         z_se_vec_at_estim_t[fac_curr] <- resl[[sim_type]]$fac_1_longit_1[[z_nam]]$se[it]
       }
+      end_time <- Sys.time()
+      resl[[sim_type]]$fac_1_longit_1$run_time[it] <- end_time - start_time
       resl[[sim_type]]$fac_1_longit_1$y$est[it] <- t(mfd_object$A[y_nam, ]) %*% z_est_vec_at_estim_t * mfd_object$sd_scale_factor[y_nam]
       resl[[sim_type]]$fac_1_longit_1$y$se[it] <- sqrt(sum(mfd_object$A[paste0("Y", control$y_ind_use), ]^2 * z_se_vec_at_estim_t^2)) * 
         mfd_object$sd_scale_factor[y_nam]
@@ -283,6 +298,7 @@ for (it in 1:control$n_its_benchmark) {
       #################################################################
       # Vector autoregressive model
       if (sim_type == "non_null") {
+        start_time <- Sys.time()
         data_filtered <- sub_data$time %>%
           select(ID, starts_with("Y"))
         list_by_id <- split(data_filtered, data_filtered$ID)
@@ -319,6 +335,8 @@ for (it in 1:control$n_its_benchmark) {
         
         predmat <- sapply(var_fit, function(x) x$pred)
         estimated_effect <- predmat[y_nam, "Active"] - predmat[y_nam, "Placebo"]
+        end_time <- Sys.time()
+        resl[[sim_type]]$VAR$run_time[it] <- end_time - start_time
         resl[[sim_type]]$VAR$y$est[it] <- estimated_effect
       }        
       if (it > 1) {
@@ -333,7 +351,7 @@ for (it in 1:control$n_its_benchmark) {
       }    
     }  
   })    
-      
+  
   resl[["non_null"]]$true_estimand <- sim_non_null$E_Y[as.character(control$time_pt_eval), y_nam, "trt_1"] - 
     sim_non_null$E_Y[as.character(control$time_pt_eval), y_nam, "trt_0"]
   resl[["non_null"]]$example_sim <- sim_non_null

@@ -76,6 +76,7 @@ for (j in sims_include) {
                           mse_se = format_fun(mse_se, ndp),
                           rmse = format_fun(sqrt(mse), ndp_precise),
                           bias = format_fun(bias_est, ndp),
+                          # bias2 = format_fun(bias_est^2, ndp),
                           bias_se = format_fun(bias_se, ndp),
                           sd = format_fun(sd_est, ndp_precise),
                           sd_se = format_fun(sd_se, ndp_precise),
@@ -93,6 +94,8 @@ for (j in sims_include) {
     tab_res$rmse[which.min(sqrt(mse))] <- paste0(latex_for_best, "{", tab_res$rmse[which.min(sqrt(mse))], "}")
     tab_res$mse_in <- tab_res$mse
     tab_res$mse[which.min(mse)] <- paste0(latex_for_best, "{", tab_res$mse[which.min(mse)], "}")
+    tab_res$bias[which.min(bias_est^2)] <- paste0(latex_for_best, "{", tab_res$bias[which.min(bias_est^2)], "}")
+    tab_res$sd[which.min(tab_res$sd)] <- paste0(latex_for_best, "{", tab_res$sd[which.min(tab_res$sd)], "}")
     # tab_res$power[which.max(power)] <- paste0(latex_for_best, "{", tab_res$power[which.max(power)], "}")
     # tab_res$mn_ci_width[which.min(mn_ci_width)] <- paste0(latex_for_best, "{", tab_res$mn_ci_width[which.min(mn_ci_width)], "}")
     res_list[[j]] <- tab_res

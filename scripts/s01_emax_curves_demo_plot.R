@@ -58,7 +58,6 @@ arrows(x0 = time_of_final_week_effect * 1.01,
       )
 par(xpd = FALSE)
 mtext(side = 4,
-      # text = expression(delta),
       text = "ATE",
       at = -size_of_final_week_effect_placebo - .5 * size_of_final_week_effect_active_effect,
       line = .25,

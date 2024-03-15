@@ -21,7 +21,7 @@ if (run_on_a_server) {
 }
 
 dir.create("output", showWarnings = FALSE)
-TASK_ID <- 1#for (TASK_ID in TASK_ID_ALL) {
+for (TASK_ID in TASK_ID_ALL) {
   control <- get_control_parameters_simulations(parameter_set = TASK_ID)
   placebo_label <- "Placebo"
   estimate_type <- c("treatment_means", "contrasts_vs_placebo")[2]
@@ -41,13 +41,11 @@ TASK_ID <- 1#for (TASK_ID in TASK_ID_ALL) {
       }
     }
   }
-it <- 1#  for (it in 1:control$n_its) {
+  for (it in 1:control$n_its) {
     if (it %% 25 == 0) {
       print(it)
     }
-  
-    
-sim_type <- "non_null"#    for (sim_type in c("null", "non_null")) {
+    for (sim_type in c("null", "non_null")) {
       ##########################################
       # Simulate data 
       sim_curr <- simulate_data(control = control, 

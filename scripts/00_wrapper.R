@@ -21,6 +21,9 @@ if (computation_type == "simulations") {
   source("scripts/s01_emax_curves_demo_plot.R")
   source("scripts/s02_simulation_study.R")
   source("scripts/s03_output_latex_tables.R")
+  source("scripts/s04_benchmarking.R")
+  source("scripts/s05_output_benchmarking_latex_tables.R")
+  source("scripts/s06_export_results.R")
 }
 
 #######################################

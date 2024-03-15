@@ -15,7 +15,8 @@ tab_export_files <- c(control$default_sim_table_file,
                       control$sim_results_file, 
                       control$emax_example_plot_file, 
                       control$numbers_out_dir,
-                      control$benchmarking_results_file)
+                      control$benchmarking_results_files,
+                      control$benchmarking_runtime_file)
 tab_export_files_zipped <- zip::zip(zipfile = file.path("zipped_tables.zip"),
                                     files = tab_export_files,
                                     mode = "cherry-pick")
@@ -25,4 +26,5 @@ tar(tarfile = tab_export_files_zipped,
     compression = 'gzip',
     tar = "tar")
 browseURL(tab_export_files_zipped) # this downloads locally to Downloads folder on a PC
+
 

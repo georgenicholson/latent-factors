@@ -9,7 +9,7 @@ library(itertools)  # for zip(...) like for looping
 # previously required dependencies (kept for now) -------
 # library(gsubfn)  # need 0.7-0 or later; for assigning multiple values to list
 # library(MASS)  # ginv is imported from MASS (see NAMESPACE file and call with MASS:: below)
-library(rapportools) # for is.boolean(...) function
+# library(rapportools) # for is.boolean(...) function
 library("gplots")
 
 

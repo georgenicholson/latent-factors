@@ -25,9 +25,7 @@ for(i in 1:length(control$benchmarking_table_split)) {
       resl <- readRDS(file = file.path("output", 
                 paste0("resl_includeVAR_", TRUE, "benchmarking_parameter_set_", j, ".RDS")))
       str(resl$non_null, m = 1)
-      
-      # TODO: Update the below file names and locations to link with outputs from Python code
-      fabian_results_dir <- "sim_results_from_Fabian"
+      fabian_results_dir <- "data/python_deep_learning_output"
       for (meth in c("RNN", "LSTM", "GRU")) {
         resl$non_null[[meth]] <- list()
         resl$non_null[[meth]]$y <- list()

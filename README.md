@@ -30,6 +30,8 @@ In the final step running `renv::restore(path_to_dir)`, make sure to select opti
 
 To run the Python scripts, you need to install a virtual or conda environment with the dependencies as listed in `requirements.txt`.
 
+Further, you need to download the simulation datasets [here](https://drive.google.com/file/d/1YzcPeoYiNyJLaUKkWHyouDLr_2omVw6x/view?usp=sharing). Unzip the folder, and place it in `data/`.
+
 
 ## Scripts to reproduce simulation results in manuscript
 
